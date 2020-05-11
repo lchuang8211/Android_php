@@ -14,5 +14,16 @@
         android:text="here"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-
+    <Button
+        android:id="@+id/btn_send"
+        android:textSize="20sp"
+        android:text="send data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/btn_get"
+        android:textSize="20sp"
+        android:text="show data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
