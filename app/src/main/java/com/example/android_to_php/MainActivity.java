@@ -104,20 +104,21 @@ public class MainActivity extends AppCompatActivity  {
         Log.i("JSON", "解析JSON成功 "+ jsonPhonein);
         return Datatest;
     }
-
+    String phoneDataJson="";
+    StringBuilder response;
     class myAsyncTask extends AsyncTask<String, Integer, Void> {
         @Override
         protected Void doInBackground(String... strings) {
-            HttpURLConnection urlConnection = null;
-            OutputStream os = null;
-            InputStream getinputStream = null;
-            gson = new Gson();
-            String phoneDataJson = gson.toJson(data);
+//            HttpURLConnection urlConnection = null;
+//            OutputStream out = null;
+//            InputStream getinputStream = null;
+//            gson = new Gson();
+//            String phoneDataJson = gson.toJson(data);
 
-            Log.i("JSON","Gson toJson:"+ phoneDataJson);
-            Log.i("JSON","Gson toJson:"+ gson.toJson(data));
+//            Log.i("JSON","Gson toJson:"+ phoneDataJson);
+//            Log.i("JSON","Gson toJson:"+ gson.toJson(data));
             try {
-                urlConnection = (HttpURLConnection) urlAPI.openConnection();
+                HttpURLConnection urlConnection = (HttpURLConnection) urlAPI.openConnection();
                 Log.i("JSON","urlConnection :"+ urlConnection);
                 /* optional request header */
                 urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -129,39 +130,53 @@ public class MainActivity extends AppCompatActivity  {
                 urlConnection.setReadTimeout(10000);
                 urlConnection.setDoInput(true);    //允許輸入流，即允許下載
                 urlConnection.setDoOutput(true);   //允許輸出流，即允許上傳
-                urlConnection.setUseCaches(false); //設置是否使用緩存
-                phoneDataJson = jsonPhonein.getString("phoneDataJson");
-                Log.i("JSON","Json getstring :"+ phoneDataJson);
-                int statusCode = urlConnection.getResponseCode();
-                /* //200 represents HTTP OK //
-                if (statusCode == 200) {
-                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
-                }*/
-                os = urlConnection.getOutputStream();
-                Log.i("JSON","os urlConnection.getOutputStream() :" + os);
-                DataOutputStream writer = new DataOutputStream( os );
+                urlConnection.setUseCaches(true); //設置是否使用緩存
+                phoneDataJson = jsonPhonein.toString();
+                Log.i("JSON","Json tostring :"+ phoneDataJson);
+                urlConnection.connect();
+//                Log.i("JSON","urlConnection.connect(): "+ urlConnection);
+//                int statusCode = urlConnection.getResponseCode();
+//                Log.i("JSON","statusCode : "+ statusCode);
+                 //200 represents HTTP OK //
+//                if (statusCode == 200) {
+//                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
+//                }
+                //os = urlConnection.getOutputStream();
+//                Log.i("JSON","os urlConnection.getOutputStream() :" + os);
+
+//                OutputStream out = urlConnection.getOutputStream();
+//                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+//                bw.write(phoneDataJson);
+                DataOutputStream writer = new DataOutputStream( urlConnection.getOutputStream() );
                 writer.writeBytes(phoneDataJson);
                 writer.flush();
+
+//                bw.flush();
+//                out.close();
+                urlConnection.getOutputStream().close();
+//                bw.close();
                 writer.close();
-                os.close();
+
 //                //Get Response
-//                getinputStream = urlConnection.getInputStream();
-//                Log.i("JSON","getinputStream  :"+ getinputStream);
-//                BufferedReader reader = new BufferedReader(new InputStreamReader(getinputStream));
-//                String line;
-//                StringBuilder response = new StringBuilder();
-//                while ((line = reader.readLine()) != null) {
-//                    response.append(line);
-//                    response.append('\r');
-//                }
-//                Log.i("JSON","response :" + response);
-//                reader.close();
+                InputStream getinputStream = urlConnection.getInputStream();
+                Log.i("JSON","getinputStream  :" + getinputStream);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(getinputStream));
+                String line;
+                response = new StringBuilder();
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                    System.err.println(line);
+                    response.append('\r');
+                }
+
+                reader.close();
+                urlConnection.disconnect();
+                Log.i("JSON", "disconnect urlConnection");
             }catch (Exception e){
-                System.err.println(e + "___3");
+                System.err.println(e + "+___3");
             }
 
-//            urlConnection.disconnect();
-            Log.i("JSON", "disconnect urlConnection");
+
             return null;
         }
     }
