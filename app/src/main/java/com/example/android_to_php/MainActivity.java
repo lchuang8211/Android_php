@@ -34,17 +34,17 @@ import java.net.ProtocolException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity  {
-    final private URL uriAPI =  new URL("http://114.47.23.252/page2.php");
+    final private URL urlAPI =  new URL("http://118.171.121.119/page3.php");
     InputStream inputStream = null;
-    HttpURLConnection urlConnection = null;
-    String urlWithParams = uriAPI.toString();
+
+    String urlWithParams = urlAPI.toString();
 
     private View.OnClickListener btn_send_click=new View.OnClickListener(){
         @Override
         public void onClick(View v) {
             Log.i("JSON","Send按鍵觸發");
             postDatatest(txtinput.getText().toString());
-            webView.loadUrl("http://114.47.23.252/page2.php");
+//            webView.loadUrl("http://118.171.121.119/page3.php?phoneDataJson="+txtinput.getText().toString());
             Log.i("JSON","Send按鍵結束");
         }
     };
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity  {
         try {
             //手機輸入字串(input)轉成 JSON格式
             jsonPhonein = new JSONObject();
-            jsonPhonein.put("string_input", input);
+            jsonPhonein.put("phoneDataJson", input);
             Log.i("JSON","JSON包裝成功");
             data = input;
 //            sendPostDataToInternet(data);
@@ -87,9 +87,7 @@ public class MainActivity extends AppCompatActivity  {
             Log.i("JSON","JSON包裝失敗");
         }
     }
-    private String getDatatest() {  //
-
-
+    private String getDatatest(){
         try {
 
         }catch (Exception ex){
@@ -97,27 +95,30 @@ public class MainActivity extends AppCompatActivity  {
         }
         String Datatest = null;
         try {
-            Datatest = jsonPhonein.getString("string_input");
+            Datatest = jsonPhonein.getString("phoneDataJson");
         } catch (JSONException e) {
             System.err.println(e);
             Log.i("JSON", "解析JSON失敗");
         }
         txtoutput.setText(Datatest);
-        Log.i("JSON", "解析JSON成功");
+        Log.i("JSON", "解析JSON成功 "+ jsonPhonein);
         return Datatest;
     }
 
     class myAsyncTask extends AsyncTask<String, Integer, Void> {
         @Override
         protected Void doInBackground(String... strings) {
-            HttpURLConnection httpConnection = null;
+            HttpURLConnection urlConnection = null;
             OutputStream os = null;
-            InputStream getinputStream=null;
+            InputStream getinputStream = null;
             gson = new Gson();
             String phoneDataJson = gson.toJson(data);
-            Log.i("JSON","Gson toJson:"+phoneDataJson);
+
+            Log.i("JSON","Gson toJson:"+ phoneDataJson);
+            Log.i("JSON","Gson toJson:"+ gson.toJson(data));
             try {
-                urlConnection = (HttpURLConnection) uriAPI.openConnection();
+                urlConnection = (HttpURLConnection) urlAPI.openConnection();
+                Log.i("JSON","urlConnection :"+ urlConnection);
                 /* optional request header */
                 urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 /* optional request header */
@@ -126,44 +127,44 @@ public class MainActivity extends AppCompatActivity  {
                 urlConnection.setRequestMethod("GET");
                 urlConnection.setConnectTimeout(10000);
                 urlConnection.setReadTimeout(10000);
-                urlConnection.setDoInput(true); //允許輸入流，即允許下載
-                urlConnection.setDoOutput(true); //允許輸出流，即允許上傳
+                urlConnection.setDoInput(true);    //允許輸入流，即允許下載
+                urlConnection.setDoOutput(true);   //允許輸出流，即允許上傳
                 urlConnection.setUseCaches(false); //設置是否使用緩存
+                phoneDataJson = jsonPhonein.getString("phoneDataJson");
+                Log.i("JSON","Json getstring :"+ phoneDataJson);
                 int statusCode = urlConnection.getResponseCode();
                 /* //200 represents HTTP OK //
                 if (statusCode == 200) {
                     inputStream = new BufferedInputStream(urlConnection.getInputStream());
                 }*/
                 os = urlConnection.getOutputStream();
-                Log.i("JSON","os urlConnection.getOutputStream() :"+os);
-                DataOutputStream writer = new DataOutputStream(os);
+                Log.i("JSON","os urlConnection.getOutputStream() :" + os);
+                DataOutputStream writer = new DataOutputStream( os );
                 writer.writeBytes(phoneDataJson);
                 writer.flush();
                 writer.close();
                 os.close();
-                //Get Response
-                getinputStream = urlConnection.getInputStream();
-                Log.i("JSON","getinputStream  :"+ getinputStream);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(getinputStream));
-                String line;
-                StringBuilder response = new StringBuilder();
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                    response.append('\r');
-                }
-                Log.i("JSON","response  :"+ response);
-                reader.close();
+//                //Get Response
+//                getinputStream = urlConnection.getInputStream();
+//                Log.i("JSON","getinputStream  :"+ getinputStream);
+//                BufferedReader reader = new BufferedReader(new InputStreamReader(getinputStream));
+//                String line;
+//                StringBuilder response = new StringBuilder();
+//                while ((line = reader.readLine()) != null) {
+//                    response.append(line);
+//                    response.append('\r');
+//                }
+//                Log.i("JSON","response :" + response);
+//                reader.close();
             }catch (Exception e){
-                System.err.println(e+"___3");
+                System.err.println(e + "___3");
             }
 
-            urlConnection.disconnect();
-            Log.i("JSON", "disconnect httpConnection");
+//            urlConnection.disconnect();
+            Log.i("JSON", "disconnect urlConnection");
             return null;
         }
     }
-
-
 
     private void InitialComponent() {
         phoneshowdata= findViewById(R.id.phoneshowdata);
@@ -173,12 +174,11 @@ public class MainActivity extends AppCompatActivity  {
         btn_send.setOnClickListener(btn_send_click);
         btn_get = findViewById(R.id.btn_get);
         btn_get.setOnClickListener(btn_get_click);
-
     }
 
     private void webView_all() {
         webView = findViewById(R.id.webView);
-        webView.loadUrl("http://114.47.23.252/page2.php");
+        webView.loadUrl("http://118.171.121.119/page3.php");
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);  // 取得網頁JS效果
         webSettings.setDefaultTextEncodingName("utf-8");
