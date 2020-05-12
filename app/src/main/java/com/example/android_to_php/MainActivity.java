@@ -16,12 +16,15 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -35,7 +38,7 @@ public class MainActivity extends AppCompatActivity  {
         public void onClick(View v) {
             Log.i("JSON","Send按鍵觸發");
             postDatatest(txtinput.getText().toString());
-//            webView.loadUrl("http://114.47.23.252/page2.php");
+            webView.loadUrl("http://114.47.23.252/page2.php");
             Log.i("JSON","Send按鍵結束");
         }
     };
@@ -59,14 +62,14 @@ public class MainActivity extends AppCompatActivity  {
         webView_all();
 
     }
-    JSONObject jsonin;
+    JSONObject jsonPhonein;
     String data;
     private void postDatatest(String input)  {
         try {
-
-            jsonin = new JSONObject();
-            jsonin.put("string_input", input);
-            Log.i("JSON","包裝成功");
+            //手機輸入字串(input)轉成 JSON格式
+            jsonPhonein = new JSONObject();
+            jsonPhonein.put("string_input", input);
+            Log.i("JSON","JSON包裝成功");
 
 //            sendPostDataToInternet(data);
             myAsyncTask myAsyncTask = new myAsyncTask();
@@ -74,56 +77,64 @@ public class MainActivity extends AppCompatActivity  {
             Log.i("JSON","myAsyncTask成功");
         }catch(JSONException je) {
             System.err.println(je);
-            Log.i("JSON","包裝失敗");
+            Log.i("JSON","JSON包裝失敗");
         }
     }
-    private String getDatatest() {
+    private String getDatatest() {  //
         String Datatest = null;
         try {
-            Datatest = jsonin.getString("string_input");
+            Datatest = jsonPhonein.getString("string_input");
         } catch (JSONException e) {
             System.err.println(e);
             Log.i("JSON", "解析JSON失敗");
         }
         txtoutput.setText(Datatest);
-        Log.i("JSON", "解析成功");
+        Log.i("JSON", "解析JSON成功");
         return Datatest;
     }
-//    Handler handler_Success = new Handler()
+
     class myAsyncTask extends AsyncTask<String, Integer, Void> {
         @Override
         protected Void doInBackground(String... strings) {
             HttpURLConnection httpConnection = null;
+            OutputStream os = null;
+            data = jsonPhonein.toString();  // JSON檔 轉乘要傳的 String
             Log.i("JSON", "in httpConnection");
             try {
                 Log.i("JSON", "try httpConnection");
                 httpConnection = (HttpURLConnection) uriAPI.openConnection();
-                httpConnection.setRequestMethod("POST");//設定訪問方式 POST
+                httpConnection.setRequestMethod("POST");//設定訪問方式 POST/GET
+                httpConnection.setRequestProperty("Content-Type","application/json;charset=utf-8");
                 Log.i("JSON", "post httpConnection");
-                httpConnection.setDoInput(false);
+                //httpConnection.setDoInput(false);
                 httpConnection.setDoOutput(true);// 使用 URL 連線進行輸出
-                Log.i("JSON", "output httpConnection");
-                httpConnection.setConnectTimeout(8000); //連線時間
+
+                httpConnection.setConnectTimeout(15000); //連線時間
+                //open
+                httpConnection.connect();
+                Log.i("JSON", "connect OK  httpConnection");
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-                DataOutputStream wr = new DataOutputStream(httpConnection.getOutputStream());
-                Log.i("JSON", "wr httpConnection");
-                data = jsonin.toString();
-                Log.i("JSON", "DATA httpConnection");
-                wr.writeBytes(data);
-                wr.flush();
-                wr.close();
+                //setup send
+                os = new BufferedOutputStream(httpConnection.getOutputStream());
+                os.write(data.getBytes());
+                Log.i("JSON", "write OK  httpConnection");
+                //clean up
+                os.flush();
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                Log.i("JSON", "CLOSE httpConnection");
 
             }catch (ProtocolException e){
                 e.printStackTrace();
-                System.err.println(e+"1");
+                System.err.println(e+"___1");
             } catch (IOException e) {
                 e.printStackTrace();
-                System.err.println(e+"2");
+                System.err.println(e+"___2");
             }catch (Exception e){
-                System.err.println(e+"3");
+                System.err.println(e+"___3");
             }
 
+            httpConnection.disconnect();
+            Log.i("JSON", "disconnect httpConnection");
             return null;
         }
     }
