@@ -34,7 +34,8 @@ import java.net.ProtocolException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity  {
-    final private URL urlAPI =  new URL("http://118.171.121.119/page4.php");
+    String myIP = "http://hhlc.ddnsking.com/";
+    final private URL urlAPI =  new URL(myIP+"page4.php");
     InputStream inputStream = null;
 
     String urlWithParams = urlAPI.toString();
@@ -180,7 +181,7 @@ public class MainActivity extends AppCompatActivity  {
 
     private void webView_all() {
         webView = findViewById(R.id.webView);
-        webView.loadUrl("http://118.171.121.119/page5.php");
+        webView.loadUrl(myIP+"page5.php");
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);   // 取得網頁JS效果
         webSettings.setDefaultTextEncodingName("utf-8");
